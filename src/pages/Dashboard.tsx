@@ -1,6 +1,8 @@
 // src/pages/Dashboard.tsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import UserIcon from '../components/UserIcon';
 import './Dashboard.css';
 import {
   fetchMarketOverview,
@@ -12,8 +14,15 @@ import {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, loading, logout } = useAuth();
   const [portfolioData, setPortfolioData] = useState<any>(null);
   
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      navigate('/login');
+    }
+  }, [currentUser, loading, navigate]);
+
   useEffect(() => {
     const fetchData = async () => {
       const portfolio = await fetchPortfolioData();
@@ -21,6 +30,19 @@ const Dashboard: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -33,8 +55,9 @@ const Dashboard: React.FC = () => {
           <Link to="/" className="nav-item">Overview</Link>
           <Link to="#" className="nav-item">Insights</Link>
           <Link to="/dashboard" className="nav-item active">Dashboard</Link>
-          <Link to="#" className="nav-item">Login</Link>
-          <Link to="#" className="nav-item">Assistant</Link>
+          <Link to="/assistant" className="nav-item">Assistant</Link>
+          <UserIcon />
+          <button onClick={handleLogout} className="nav-item logout-btn">Logout</button>
         </nav>
       </header>
 

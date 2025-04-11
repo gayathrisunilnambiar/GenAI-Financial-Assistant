@@ -2,24 +2,31 @@
 /* Previous styles remain the same */
 
 .chat-header {
-    padding: 1rem;
+    padding: 1.25rem;
     background-color: var(--bg-element);
     border-bottom: 1px solid var(--border-color);
+    border-radius: 16px 16px 0 0;
   }
   
   .chat-header h2 {
     margin: 0;
     color: var(--text-primary);
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
   }
   
   .assistant-avatar {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    color: white;
   }
   
   .message-content {
@@ -28,14 +35,16 @@
   
   .typing-indicator {
     display: flex;
-    gap: 4px;
+    gap: 6px;
+    padding: 8px 12px;
   }
   
   .typing-indicator span {
-    width: 8px;
-    height: 8px;
-    background-color: var(--text-secondary);
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary-color);
     border-radius: 50%;
+    opacity: 0.7;
     animation: typing 1s infinite ease-in-out;
   }
   
@@ -58,9 +67,11 @@
   }
   
   .chat-message {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 1rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    max-width: 75%;
+    line-height: 1.5;
+    font-size: 1rem;
   }
   
   /* Make sure the chat window scrolls to bottom when new messages arrive */
@@ -79,10 +90,10 @@
 
 .chatbot-box {
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   background-color: var(--bg-element);
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 120px);
@@ -97,52 +108,57 @@
   gap: 1rem;
 }
 
-.chat-message {
-  padding: 1rem;
-  border-radius: 8px;
-  max-width: 80%;
-}
-
 .chat-message.user {
   background-color: var(--primary-color);
   color: white;
   align-self: flex-end;
-  margin-left: 20%;
+  margin-left: 25%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-message.assistant {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   align-self: flex-start;
-  margin-right: 20%;
+  margin-right: 25%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-input {
-  padding: 1rem;
+  padding: 1.25rem;
   border-top: 1px solid var(--border-color);
   display: flex;
   gap: 1rem;
+  background-color: var(--bg-element);
+  border-radius: 0 0 16px 16px;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 .chat-input button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.75rem;
   background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.2s;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
 .chat-input button:hover:not(:disabled) {

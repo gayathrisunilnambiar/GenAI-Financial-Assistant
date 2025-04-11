@@ -1,0 +1,45 @@
+.user-icon-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.user-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.user-icon:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.user-initial {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.login-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+} 

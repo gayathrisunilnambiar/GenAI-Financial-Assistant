@@ -1,10 +1,17 @@
 // src/pages/Home.tsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import UserIcon from '../components/UserIcon';
 import './Home.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return (
     <div className="app-container">
@@ -18,8 +25,7 @@ const Home: React.FC = () => {
           <Link to="/" className="nav-item active">Overview</Link>
           <Link to="#" className="nav-item">Insights</Link>
           <Link to="/dashboard" className="nav-item">Dashboard</Link>
-          <Link to="#" className="nav-item">Login</Link>
-          <Link to="/Chatbot" className="nav-item">Assistant</Link>
+          <UserIcon />
         </nav>
       </header>
 
