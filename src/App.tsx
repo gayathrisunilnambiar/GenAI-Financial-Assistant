@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Chatbot from './pages/Chatbot';
 import Dashboard from './pages/Dashboard';
+import PortfolioAnalysis from './pages/PortfolioAnalysis';
+import Signup from './pages/Signup';
 
 const App: React.FC = () => {
   return (
@@ -13,10 +15,12 @@ const App: React.FC = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
           {/* Protected Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/portfolio-analysis" element={<PortfolioAnalysis />} />
           <Route path="/assistant" element={<Chatbot />} />
           
           {/* Catch all route - redirect to home */}

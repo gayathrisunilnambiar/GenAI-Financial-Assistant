@@ -1,0 +1,237 @@
+.portfolio-analysis-content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.analysis-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.period-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.portfolio-form {
+  margin-bottom: 2rem;
+}
+
+.stocks-input {
+  margin-bottom: 1.5rem;
+}
+
+.stock-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.ticker-input,
+.weight-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.ticker-input {
+  width: 120px;
+}
+
+.weight-input {
+  width: 100px;
+}
+
+.remove-btn,
+.add-btn,
+.analyze-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-btn {
+  background-color: #ff4444;
+  color: white;
+}
+
+.remove-btn:hover {
+  background-color: #cc0000;
+}
+
+.add-btn {
+  background-color: #4CAF50;
+  color: white;
+  margin-right: 1rem;
+}
+
+.add-btn:hover {
+  background-color: #45a049;
+}
+
+.analyze-btn {
+  background-color: #2196F3;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+}
+
+.analyze-btn:hover {
+  background-color: #1976D2;
+}
+
+.analyze-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #ffebee;
+  border-radius: 6px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.metric-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2196F3;
+  margin: 0;
+}
+
+.metric-label {
+  color: #666;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+}
+
+.model-performance {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.model-performance h3 {
+  color: #333;
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.performance-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.performance-card {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.performance-card h4 {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.performance-card p {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.loading-analysis {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .portfolio-analysis-content {
+    padding: 1rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ticker-input,
+  .weight-input {
+    width: 100%;
+  }
+
+  .performance-metrics {
+    grid-template-columns: 1fr;
+  }
+} 

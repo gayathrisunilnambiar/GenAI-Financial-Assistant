@@ -291,6 +291,7 @@ const Dashboard: React.FC = () => {
           <Link to="/" className="nav-item">Overview</Link>
           <Link to="#" className="nav-item">Insights</Link>
           <Link to="/dashboard" className="nav-item active">Dashboard</Link>
+          <Link to="/portfolio-analysis" className="nav-item">Portfolio Analysis</Link>
           <Link to="/assistant" className="nav-item">Assistant</Link>
           <UserIcon />
           <button onClick={handleLogout} className="nav-item logout-btn">Logout</button>

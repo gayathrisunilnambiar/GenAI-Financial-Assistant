@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+from portfolio_lstm import analyze_portfolio
 
 # Load API Key
 GROQ_API_KEY = "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"
@@ -47,6 +48,31 @@ def ask_groq(messages):
     response.raise_for_status()
     reply = response.json()["choices"][0]["message"]["content"]
     return reply.strip()
+
+# Portfolio Analysis Section
+st.sidebar.title("Portfolio Analysis")
+stocks = st.sidebar.text_input("Enter stock tickers (comma-separated)", "AAPL,MSFT,GOOGL")
+weights = st.sidebar.text_input("Enter weights (comma-separated)", "0.3,0.3,0.4")
+period = st.sidebar.selectbox("Select time period", ["1d", "1w", "1m", "1y"])
+
+if st.sidebar.button("Analyze Portfolio"):
+    try:
+        stocks_list = [s.strip() for s in stocks.split(",")]
+        weights_list = [float(w.strip()) for w in weights.split(",")]
+        
+        if len(stocks_list) != len(weights_list):
+            st.sidebar.error("Number of stocks and weights must match!")
+        else:
+            result = analyze_portfolio(stocks_list, weights_list, period)
+            
+            st.sidebar.subheader("Portfolio Analysis Results")
+            st.sidebar.write(f"Predicted Next Value: ${result['prediction']:.2f}")
+            st.sidebar.write("Model Performance Metrics:")
+            st.sidebar.write(f"MSE: {result['metrics']['mse']:.4f}")
+            st.sidebar.write(f"RMSE: {result['metrics']['rmse']:.4f}")
+            st.sidebar.write(f"MAE: {result['metrics']['mae']:.4f}")
+    except Exception as e:
+        st.sidebar.error(f"Error in portfolio analysis: {str(e)}")
 
 # Display chat history like ChatGPT
 for message in st.session_state.chat_history[1:]:  # skip system message
