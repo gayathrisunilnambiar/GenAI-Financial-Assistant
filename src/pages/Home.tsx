@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserIcon from '../components/UserIcon';
@@ -8,6 +8,38 @@ import './Home.css';
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, loading } = useAuth();
+  const [selectedStock, setSelectedStock] = useState(0);
+  const [timeRange, setTimeRange] = useState('1D');
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Sample stock data - replace with real data
+  const topStocks = [
+    { symbol: 'AAPL', name: 'Apple Inc.', price: 175.34, change: 2.5, data: [170, 172, 171, 173, 174, 175, 174, 175, 176, 175] },
+    { symbol: 'MSFT', name: 'Microsoft Corp.', price: 328.39, change: 1.8, data: [325, 326, 327, 326, 328, 327, 328, 329, 328, 328] },
+    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 142.56, change: 3.2, data: [140, 141, 142, 141, 142, 143, 142, 143, 142, 142] },
+    { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.75, change: 1.5, data: [177, 178, 177, 178, 179, 178, 179, 178, 179, 178] },
+    { symbol: 'META', name: 'Meta Platforms', price: 485.58, change: 2.1, data: [480, 482, 483, 484, 483, 484, 485, 484, 485, 485] }
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAutoPlaying) {
+      interval = setInterval(() => {
+        setSelectedStock((prev) => (prev + 1) % topStocks.length);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, topStocks.length]);
+
+  const handlePrev = () => {
+    setSelectedStock((prev) => (prev - 1 + topStocks.length) % topStocks.length);
+    setIsAutoPlaying(false);
+  };
+
+  const handleNext = () => {
+    setSelectedStock((prev) => (prev + 1) % topStocks.length);
+    setIsAutoPlaying(false);
+  };
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -40,38 +72,30 @@ const Home: React.FC = () => {
               <button className="time-btn">Month</button>
               <button className="time-btn">Quarter</button>
             </div>
-            <div className="assets-dropdown">
-              <button>All assets ▾</button>
-            </div>
           </div>
 
-          <div className="balance-section">
-            <div className="total-balance">
-              <h1>$103,489<span className="cents">.24</span></h1>
-              <div className="balance-stats">
-                <span className="stat-pill positive">↑ 1.8%</span>
-                <span className="stat-pill positive">+ $5.29%</span>
+          <div className="stocks-list">
+            {topStocks.map((stock, index) => (
+              <div 
+                key={stock.symbol}
+                className={`stock-item ${selectedStock === index ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedStock(index);
+                  setIsAutoPlaying(false);
+                }}
+              >
+                <div className="stock-info">
+                  <span className="stock-symbol">{stock.symbol}</span>
+                  <span className="stock-name">{stock.name}</span>
+                </div>
+                <div className="stock-price">
+                  <span className="price">${stock.price}</span>
+                  <span className={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
+                    {stock.change >= 0 ? '+' : ''}{stock.change}%
+                  </span>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="chart-container">
-            <div className="chart-values">
-              <span>110</span>
-              <span>105</span>
-              <span>100</span>
-              <span>95</span>
-              <span>90</span>
-              <span>85</span>
-            </div>
-            <div className="chart">
-              {/* Chart will be implemented separately */}
-            </div>
-            <div className="chart-labels">
-              {[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31].map(num => (
-                <span key={num}>{num}</span>
-              ))}
-            </div>
+            ))}
           </div>
         </section>
 
@@ -79,13 +103,56 @@ const Home: React.FC = () => {
         <section className="analytics-section">
           <div className="analytics-header">
             <h3>Real-time Analytics</h3>
-            <div className="analytics-filters">
-              <span className="filter active">New</span>
-              <span className="filter">Retention</span>
+            <div className="time-controls">
+              <button 
+                className={`time-btn ${timeRange === '1D' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1D')}
+              >
+                Day
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1W' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1W')}
+              >
+                Week
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1M' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1M')}
+              >
+                Month
+              </button>
             </div>
           </div>
-          <div className="scatter-plot">
-            {/* Scatter plot will be implemented separately */}
+
+          <div className="chart-container">
+            <div className="chart">
+              <svg className="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path
+                  d={topStocks[selectedStock].data.map((value, i) => {
+                    const x = (i / (topStocks[selectedStock].data.length - 1)) * 100;
+                    const y = 100 - ((value - Math.min(...topStocks[selectedStock].data)) / 
+                      (Math.max(...topStocks[selectedStock].data) - Math.min(...topStocks[selectedStock].data))) * 100;
+                    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                  }).join(' ')}
+                  stroke="#007bff"
+                  strokeWidth="1"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div className="stock-info-container">
+              <div className="stock-info">
+                <span className="stock-symbol">{topStocks[selectedStock].symbol}</span>
+                <span className="stock-name">{topStocks[selectedStock].name}</span>
+              </div>
+              <div className="stock-price">
+                <span className="price">${topStocks[selectedStock].price}</span>
+                <span className={`change ${topStocks[selectedStock].change >= 0 ? 'positive' : 'negative'}`}>
+                  {topStocks[selectedStock].change >= 0 ? '+' : ''}{topStocks[selectedStock].change}%
+                </span>
+              </div>
+            </div>
           </div>
         </section>
 
