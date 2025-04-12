@@ -156,27 +156,26 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Community Projects */}
+        {/* About Us */}
         <section className="community-section">
           <div className="section-header">
-            <h3>Community Projects</h3>
-            <button className="projects-btn">Projects →</button>
+            <h3>About Us</h3>
           </div>
           
           <div className="project-card">
-            <h4>AI-Powered Fraud Detection System</h4>
-            <p>A fraud detection system that uses AI algorithms to analyze transaction data on the blockchain and identify suspicious activities, enabling early detection and prevention of fraudulent behavior in d...</p>
+            <h4>Our Mission</h4>
+            <p>PortFi is dedicated to democratizing financial analysis and investment management through cutting-edge AI technology. We empower investors of all levels with sophisticated tools and insights previously available only to professionals.</p>
             
             <div className="progress-bar">
-              <div className="progress" style={{width: '37%'}}></div>
-              <span>37% of transactions analyzed</span>
+              <div className="progress" style={{width: '100%'}}></div>
+              <span>100% Committed to Your Success</span>
             </div>
 
             <div className="participants-circle">
-              <div className="circle-progress" style={{background: 'conic-gradient(#8b5cf6 50%, #22c55e 50%)'}}></div>
+              <div className="circle-progress" style={{background: 'conic-gradient(#8b5cf6 100%, #22c55e 0%)'}}></div>
               <div className="circle-content">
-                <h2>534</h2>
-                <span>Users</span>
+                <h2>24/7</h2>
+                <span>Support</span>
               </div>
             </div>
           </div>

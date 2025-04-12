@@ -6,16 +6,12 @@ import './PortfolioAnalysis.css';
 
 interface PortfolioMetrics {
   prediction: number;
-  metrics: {
-    mse: number;
-    rmse: number;
-    mae: number;
-  };
-  portfolio_metrics: {
-    expected_return: number;
-    volatility: number;
-    sharpe_ratio: number;
-  };
+  mse: number;
+  rmse: number;
+  mae: number;
+  expectedReturn: number;
+  volatility: number;
+  sharpeRatio: number;
 }
 
 interface StockInput {
@@ -64,27 +60,36 @@ const PortfolioAnalysis: React.FC = () => {
         throw new Error('Weights must sum to 1');
       }
 
-      const response = await fetch('http://localhost:5000/analyze-portfolio', {
+      const requestData = {
+        stocks: stocks.map(s => ({ ticker: s.ticker, weight: s.weight })),
+        period
+      };
+
+      console.log('Sending request to analyze portfolio:', requestData);
+
+      const response = await fetch('http://192.168.75.248:5000/analyze-portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          stocks: stocks.map(s => s.ticker),
-          weights: stocks.map(s => s.weight),
-          period
-        }),
+        body: JSON.stringify(requestData),
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to analyze portfolio');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Received portfolio analysis data:', data);
       setMetrics(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error analyzing portfolio:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred while analyzing the portfolio');
     } finally {
       setLoadingAnalysis(false);
     }
@@ -140,6 +145,17 @@ const PortfolioAnalysis: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="portfolio-form">
+            <div className="input-description">
+              <h3>Portfolio Input Guide</h3>
+              <p>Enter your stock portfolio details below:</p>
+              <ul>
+                <li><strong>Ticker Symbol:</strong> The stock's trading symbol (e.g., AAPL for Apple, MSFT for Microsoft)</li>
+                <li><strong>Weight:</strong> The percentage of your portfolio allocated to this stock (must be between 0 and 1, and all weights must sum to 1)</li>
+                <li><strong>Time Period:</strong> Select the historical data period for analysis (1 day, 1 week, 1 month, or 1 year)</li>
+              </ul>
+              <p className="note">Note: Make sure all weights sum to 1 (100%) for accurate portfolio analysis.</p>
+            </div>
+
             <div className="stocks-input">
               {stocks.map((stock, index) => (
                 <div key={index} className="stock-row">
@@ -186,17 +202,17 @@ const PortfolioAnalysis: React.FC = () => {
               <div className="metrics-grid">
                 <div className="metric-card">
                   <h3>Expected Return</h3>
-                  <p className="metric-value">{(metrics.portfolio_metrics.expected_return * 100).toFixed(2)}%</p>
+                  <p className="metric-value">{(metrics.expectedReturn * 100).toFixed(2)}%</p>
                   <p className="metric-label">Annualized</p>
                 </div>
                 <div className="metric-card">
                   <h3>Volatility</h3>
-                  <p className="metric-value">{(metrics.portfolio_metrics.volatility * 100).toFixed(2)}%</p>
+                  <p className="metric-value">{(metrics.volatility * 100).toFixed(2)}%</p>
                   <p className="metric-label">Annualized</p>
                 </div>
                 <div className="metric-card">
                   <h3>Sharpe Ratio</h3>
-                  <p className="metric-value">{metrics.portfolio_metrics.sharpe_ratio.toFixed(4)}</p>
+                  <p className="metric-value">{metrics.sharpeRatio.toFixed(4)}</p>
                   <p className="metric-label">Risk-Adjusted Return</p>
                 </div>
                 <div className="metric-card">
@@ -211,17 +227,17 @@ const PortfolioAnalysis: React.FC = () => {
                 <div className="metrics-grid">
                   <div className="metric-card">
                     <h3>Mean Absolute Error</h3>
-                    <p className="metric-value">{metrics.metrics.mae.toFixed(4)}</p>
+                    <p className="metric-value">{metrics.mae.toFixed(4)}</p>
                     <p className="metric-label">Prediction Accuracy</p>
                   </div>
                   <div className="metric-card">
                     <h3>Mean Squared Error</h3>
-                    <p className="metric-value">{metrics.metrics.mse.toFixed(4)}</p>
+                    <p className="metric-value">{metrics.mse.toFixed(4)}</p>
                     <p className="metric-label">Model Performance</p>
                   </div>
                   <div className="metric-card">
                     <h3>Root Mean Squared Error</h3>
-                    <p className="metric-value">{metrics.metrics.rmse.toFixed(4)}</p>
+                    <p className="metric-value">{metrics.rmse.toFixed(4)}</p>
                     <p className="metric-label">Model Performance</p>
                   </div>
                 </div>

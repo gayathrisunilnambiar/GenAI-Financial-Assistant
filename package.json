@@ -18,6 +18,7 @@
     "vite": "^4.3.9"
   },
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"

@@ -25,12 +25,15 @@ const INITIAL_MESSAGES: Message[] = [
   }
 ];
 
+const API_BASE_URL = 'http://localhost:5000'; // Update this to match your backend URL
+
 const Chatbot: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, loading, logout } = useAuth();
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const chatWindowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,9 +46,29 @@ const Chatbot: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
   const scrollToBottom = () => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  };
+
+  const checkConnection = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/health`, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log('Backend connection successful:', response.data);
+      setIsConnected(response.data.status === 'healthy');
+    } catch (error) {
+      console.error('Backend connection check failed:', error);
+      setIsConnected(false);
     }
   };
 
@@ -55,6 +78,18 @@ const Chatbot: React.FC = () => {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!isConnected) {
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'Unable to connect to the server. Please check if the backend is running.',
+          timestamp: new Date()
+        }
+      ]);
+      return;
+    }
 
     const userMessage: Message = {
       role: 'user',
@@ -67,11 +102,19 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/chat', {
+      console.log('Sending message to backend:', userMessage.content);
+      const response = await axios.post(`${API_BASE_URL}/chat`, {
         message: userMessage.content,
-        context: messages.slice(-5), // Send last 5 messages for context
-        userId: currentUser?.uid // Include user ID for personalization
+        context: messages.slice(-5),
+        userId: currentUser?.uid
+      }, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
+
+      console.log('Backend response:', response.data);
 
       if (response.data && response.data.reply) {
         const assistantMessage: Message = {
@@ -81,15 +124,30 @@ const Chatbot: React.FC = () => {
         };
         setMessages(prev => [...prev, assistantMessage]);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error('Invalid response format from server');
       }
     } catch (error) {
       console.error('Error:', error);
+      let errorMessage = 'I apologize, but I encountered an error. Please try again or check your connection.';
+      
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          errorMessage = 'Request timed out. Please try again.';
+        } else if (!error.response) {
+          errorMessage = 'Unable to connect to the server. Please check if the backend is running.';
+          setIsConnected(false);
+        } else if (error.response.status === 404) {
+          errorMessage = 'The chat endpoint was not found. Please check the server configuration.';
+        } else if (error.response.data && error.response.data.error) {
+          errorMessage = `Server error: ${error.response.data.error}`;
+        }
+      }
+
       setMessages(prev => [
         ...prev,
         {
           role: 'assistant',
-          content: 'I apologize, but I encountered an error. Please try again or check your connection.',
+          content: errorMessage,
           timestamp: new Date()
         }
       ]);
