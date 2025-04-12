@@ -48,7 +48,7 @@ Overview - AI Insights Panel
 
 DashBoard with Market Overview and Confidence level
 
-![Screenshot 2025-04-12 074834](https://github.com/user-attachments/assets/458d45b7-8f3a-4818-9b47-a5c174fcb8eb)
+![Screenshot 2025-04-12 074834](https://github.com/user-attachments/assets/7db0b5e8-d948-42c7-9204-7e2cf52da428)
 ![Screenshot 2025-04-12 074926](https://github.com/user-attachments/assets/673e527c-654f-404a-ba14-8737ffdf9315)
 
 ![Screenshot 2025-04-12 074858](https://github.com/user-attachments/assets/33c8dda3-1dfc-4f2d-8603-cfd2ded6e1f2)
@@ -56,7 +56,6 @@ DashBoard with Market Overview and Confidence level
 
 Financial ChatBot
 
-![Screenshot 2025-04-12 074955](https://github.com/user-attachments/assets/4810b362-3121-477e-bdc6-8a8e2a69053c)
 ![Screenshot 2025-04-12 074946](https://github.com/user-attachments/assets/308e31ca-addf-4655-8ef2-7a1a383347b9)
 
 Portfolio Analysis
