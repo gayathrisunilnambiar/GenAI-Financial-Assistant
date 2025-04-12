@@ -5,20 +5,97 @@ import { useAuth } from '../context/AuthContext';
 import UserIcon from '../components/UserIcon';
 import './Home.css';
 
+type TimeRange = '1D' | '1W' | '1M' | '1Q' | '1Y';
+
+interface StockPrice {
+  price: number;
+  change: number;
+}
+
+interface StockPrices {
+  '1D': StockPrice;
+  '1W': StockPrice;
+  '1M': StockPrice;
+  '1Q': StockPrice;
+  '1Y': StockPrice;
+}
+
+interface Stock {
+  symbol: string;
+  name: string;
+  prices: StockPrices;
+  data: number[];
+}
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, loading } = useAuth();
   const [selectedStock, setSelectedStock] = useState(0);
-  const [timeRange, setTimeRange] = useState('1D');
+  const [timeRange, setTimeRange] = useState<TimeRange>('1D');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Sample stock data - replace with real data
-  const topStocks = [
-    { symbol: 'AAPL', name: 'Apple Inc.', price: 175.34, change: 2.5, data: [170, 172, 171, 173, 174, 175, 174, 175, 176, 175] },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', price: 328.39, change: 1.8, data: [325, 326, 327, 326, 328, 327, 328, 329, 328, 328] },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 142.56, change: 3.2, data: [140, 141, 142, 141, 142, 143, 142, 143, 142, 142] },
-    { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 178.75, change: 1.5, data: [177, 178, 177, 178, 179, 178, 179, 178, 179, 178] },
-    { symbol: 'META', name: 'Meta Platforms', price: 485.58, change: 2.1, data: [480, 482, 483, 484, 483, 484, 485, 484, 485, 485] }
+  const topStocks: Stock[] = [
+    {
+      symbol: 'AAPL',
+      name: 'Apple Inc.',
+      prices: {
+        '1D': { price: 175.34, change: 2.5 },
+        '1W': { price: 172.50, change: 1.8 },
+        '1M': { price: 168.75, change: 3.9 },
+        '1Q': { price: 165.20, change: 6.1 },
+        '1Y': { price: 150.45, change: 16.5 }
+      },
+      data: [170, 172, 171, 173, 174, 175, 174, 175, 176, 175]
+    },
+    {
+      symbol: 'MSFT',
+      name: 'Microsoft Corp.',
+      prices: {
+        '1D': { price: 328.39, change: 1.8 },
+        '1W': { price: 325.75, change: 2.5 },
+        '1M': { price: 320.50, change: 4.2 },
+        '1Q': { price: 315.25, change: 7.3 },
+        '1Y': { price: 295.80, change: 11.0 }
+      },
+      data: [325, 326, 327, 326, 328, 327, 328, 329, 328, 328]
+    },
+    {
+      symbol: 'GOOGL',
+      name: 'Alphabet Inc.',
+      prices: {
+        '1D': { price: 142.56, change: 3.2 },
+        '1W': { price: 140.25, change: 2.8 },
+        '1M': { price: 138.75, change: 4.5 },
+        '1Q': { price: 135.20, change: 8.2 },
+        '1Y': { price: 125.45, change: 13.6 }
+      },
+      data: [140, 141, 142, 141, 142, 143, 142, 143, 142, 142]
+    },
+    {
+      symbol: 'AMZN',
+      name: 'Amazon.com Inc.',
+      prices: {
+        '1D': { price: 178.75, change: 1.5 },
+        '1W': { price: 176.50, change: 2.1 },
+        '1M': { price: 172.25, change: 3.8 },
+        '1Q': { price: 168.80, change: 5.9 },
+        '1Y': { price: 155.30, change: 15.1 }
+      },
+      data: [177, 178, 177, 178, 179, 178, 179, 178, 179, 178]
+    },
+    {
+      symbol: 'META',
+      name: 'Meta Platforms',
+      prices: {
+        '1D': { price: 485.58, change: 2.1 },
+        '1W': { price: 480.25, change: 3.2 },
+        '1M': { price: 475.50, change: 4.5 },
+        '1Q': { price: 465.75, change: 6.8 },
+        '1Y': { price: 425.30, change: 14.2 }
+      },
+      data: [480, 482, 483, 484, 483, 484, 485, 484, 485, 485]
+    }
   ];
 
   useEffect(() => {
@@ -67,10 +144,36 @@ const Home: React.FC = () => {
           <div className="panel-header">
             <h2>AI Insights Panel</h2>
             <div className="time-controls">
-              <button className="time-btn active">Day</button>
-              <button className="time-btn">Week</button>
-              <button className="time-btn">Month</button>
-              <button className="time-btn">Quarter</button>
+              <button 
+                className={`time-btn ${timeRange === '1D' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1D')}
+              >
+                1D
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1W' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1W')}
+              >
+                1W
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1M' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1M')}
+              >
+                1M
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1Q' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1Q')}
+              >
+                1Q
+              </button>
+              <button 
+                className={`time-btn ${timeRange === '1Y' ? 'active' : ''}`}
+                onClick={() => setTimeRange('1Y')}
+              >
+                1Y
+              </button>
             </div>
           </div>
 
@@ -89,9 +192,9 @@ const Home: React.FC = () => {
                   <span className="stock-name">{stock.name}</span>
                 </div>
                 <div className="stock-price">
-                  <span className="price">${stock.price}</span>
-                  <span className={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
-                    {stock.change >= 0 ? '+' : ''}{stock.change}%
+                  <span className="price">${stock.prices[timeRange].price.toFixed(2)}</span>
+                  <span className={`change ${stock.prices[timeRange].change >= 0 ? 'positive' : 'negative'}`}>
+                    {stock.prices[timeRange].change >= 0 ? '+' : ''}{stock.prices[timeRange].change}%
                   </span>
                 </div>
               </div>
@@ -147,9 +250,9 @@ const Home: React.FC = () => {
                 <span className="stock-name">{topStocks[selectedStock].name}</span>
               </div>
               <div className="stock-price">
-                <span className="price">${topStocks[selectedStock].price}</span>
-                <span className={`change ${topStocks[selectedStock].change >= 0 ? 'positive' : 'negative'}`}>
-                  {topStocks[selectedStock].change >= 0 ? '+' : ''}{topStocks[selectedStock].change}%
+                <span className="price">${topStocks[selectedStock].prices[timeRange].price.toFixed(2)}</span>
+                <span className={`change ${topStocks[selectedStock].prices[timeRange].change >= 0 ? 'positive' : 'negative'}`}>
+                  {topStocks[selectedStock].prices[timeRange].change >= 0 ? '+' : ''}{topStocks[selectedStock].prices[timeRange].change}%
                 </span>
               </div>
             </div>
