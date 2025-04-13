@@ -6,7 +6,7 @@
 
 ## 🌟 Key Features
 
-- 🧠 **AI Chatbot **  
+- 🧠 **AI Chatbot**  
   Have natural conversations about investing, personal finance, and common financial concepts — no jargon, just clarity.
 
 - 📊 **Stock Portfolio Analysis**  
