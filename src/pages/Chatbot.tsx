@@ -1,4 +1,5 @@
-// src/pages/Chatbot.tsx
+// === Chatbot.tsx (Updated for proper context passing and backend sync) ===
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -15,24 +16,14 @@ interface Message {
 const INITIAL_MESSAGES: Message[] = [
   {
     role: 'assistant',
-    content: "You are FinBot, a helpful and beginner-friendly financial assistant for Indian users. "
-                "Your role is to explain personal finance concepts in a clear, concise, and engaging way — especially for beginners. "
-                "Do not provide personalized financial advice, only general educational information.\n\n"
-                "You specialize in:\n"
-                "- SIPs (Systematic Investment Plans)\n"
-                "- Mutual funds\n"
-                "- Stock market basics\n"
-                "- Risk profiles\n"
-                "- Investment options for beginners\n"
-                "- Tax-saving instruments in India\n\n"
-                "Always be friendly and informative. Use relatable analogies or simple examples if needed.\n\n"
-                "Even if the question is vague or incomplete, do your best to infer intent and provide an educational answer."
-',
+    content: `Hi! I’m FinBot – your beginner-friendly financial assistant for India 🇮🇳.
+I can help you learn about SIPs, mutual funds, stocks, risk profiles, and more!
+Go ahead, ask me anything about investing 🧠💰`,
     timestamp: new Date()
   }
 ];
 
-const API_BASE_URL = 'http://localhost:5000'; // Update this to match your backend URL
+const API_BASE_URL = 'http://localhost:5000'; // Ensure this matches your backend
 
 const Chatbot: React.FC = () => {
   const navigate = useNavigate();
@@ -65,38 +56,15 @@ const Chatbot: React.FC = () => {
 
   const checkConnection = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/health`, {
-        timeout: 5000,
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      console.log('Backend connection successful:', response.data);
+      const response = await axios.get(`${API_BASE_URL}/health`);
       setIsConnected(response.data.status === 'healthy');
-    } catch (error) {
-      console.error('Backend connection check failed:', error);
+    } catch {
       setIsConnected(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
-
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-
-    if (!isConnected) {
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'Unable to connect to the server. Please check if the backend is running.',
-          timestamp: new Date()
-        }
-      ]);
-      return;
-    }
 
     const userMessage: Message = {
       role: 'user',
@@ -109,55 +77,27 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('Sending message to backend:', userMessage.content);
+      const context = messages.slice(-6).map(msg => ({ role: msg.role, content: msg.content }));
+
       const response = await axios.post(`${API_BASE_URL}/chat`, {
         message: userMessage.content,
-        context: messages.slice(-5),
+        context,
         userId: currentUser?.uid
-      }, {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json',
-        }
       });
 
-      console.log('Backend response:', response.data);
+      const replyText = response.data?.reply || 'Hmm... I couldn’t understand that. Try rephrasing?';
 
-      if (response.data && response.data.reply) {
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: response.data.reply,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        throw new Error('Invalid response format from server');
-      }
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: replyText,
+        timestamp: new Date()
+      }]);
     } catch (error) {
-      console.error('Error:', error);
-      let errorMessage = 'I apologize, but I encountered an error. Please try again or check your connection.';
-      
-      if (axios.isAxiosError(error)) {
-        if (error.code === 'ECONNABORTED') {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (!error.response) {
-          errorMessage = 'Unable to connect to the server. Please check if the backend is running.';
-          setIsConnected(false);
-        } else if (error.response.status === 404) {
-          errorMessage = 'The chat endpoint was not found. Please check the server configuration.';
-        } else if (error.response.data && error.response.data.error) {
-          errorMessage = `Server error: ${error.response.data.error}`;
-        }
-      }
-
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: errorMessage,
-          timestamp: new Date()
-        }
-      ]);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Something went wrong. Please try again.',
+        timestamp: new Date()
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -170,91 +110,44 @@ const Chatbot: React.FC = () => {
     }
   };
 
-  const formatTimestamp = (date?: Date) => {
-    if (!date) return '';
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-
   return (
     <div className="app-container">
       <header className="header">
-        <div className="logo-section" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <img src="img1.jpeg" alt="PortFi" className="logo-img" />
-          <span className="logo-text">PortFi</span>
-        </div>
+        <div className="logo-section" onClick={() => navigate('/')}>PortFi</div>
         <nav className="nav-menu">
-          <Link to="/" className="nav-item">Overview</Link>
-          <Link to="#" className="nav-item">Insights</Link>
-          <Link to="/dashboard" className="nav-item">Dashboard</Link>
-          <Link to="/assistant" className="nav-item active">Assistant</Link>
+          <Link to="/">Overview</Link>
+          <Link to="#">Insights</Link>
+          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/assistant" className="active">Assistant</Link>
           <UserIcon />
         </nav>
       </header>
-
       <main className="chatbot-container">
         <div className="chatbot-box">
-          <div className="chat-header">
-            <h2>
-              <span role="img" aria-label="bot" style={{ marginRight: '8px' }}>🤖</span>
-              Financial Assistant
-            </h2>
-          </div>
-          <div className="chat-window" id="chat-window" ref={chatWindowRef}>
+          <div className="chat-window" ref={chatWindowRef}>
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-message ${msg.role}`}>
-                {msg.role === 'assistant' && (
-                  <div className="assistant-avatar">AI</div>
-                )}
                 <div className="message-content">
                   {msg.content}
-                  <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '4px' }}>
-                    {formatTimestamp(msg.timestamp)}
+                  <div className="timestamp">
+                    {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
               </div>
             ))}
             {isLoading && (
-              <div className="chat-message assistant">
-                <div className="assistant-avatar">AI</div>
-                <div className="message-content typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+              <div className="chat-message assistant typing-indicator">Typing...</div>
             )}
           </div>
           <div className="chat-input">
             <input
-              type="text"
               value={input}
-              onChange={handleInputChange}
+              onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about your finances, investments, or market trends..."
-              disabled={isLoading}
+              placeholder="Ask something about SIPs, stocks, taxes..."
             />
-            <button 
-              onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              className={isLoading ? 'loading' : ''}
-            >
-              {isLoading ? 'Thinking...' : 'Send'}
+            <button onClick={sendMessage} disabled={isLoading || !input.trim()}>
+              {isLoading ? '...' : 'Send'}
             </button>
           </div>
         </div>

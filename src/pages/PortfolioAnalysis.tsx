@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserIcon from '../components/UserIcon';
 import './PortfolioAnalysis.css';
+import { analyzePortfolio } from '../api/apiService';
 
 interface PortfolioMetrics {
   prediction: number;
@@ -17,6 +18,7 @@ interface PortfolioMetrics {
 interface StockInput {
   ticker: string;
   weight: number;
+  historicalPrices?: number[];
 }
 
 const PortfolioAnalysis: React.FC = () => {
@@ -31,12 +33,14 @@ const PortfolioAnalysis: React.FC = () => {
   ]);
   const [period, setPeriod] = useState('1y');
 
-  const handleStockChange = (index: number, field: keyof StockInput, value: string) => {
+  const handleStockChange = (index: number, field: keyof StockInput, value: string | number | number[]) => {
     const newStocks = [...stocks];
     if (field === 'weight') {
-      newStocks[index][field] = parseFloat(value);
-    } else {
-      newStocks[index][field] = value;
+      newStocks[index][field] = typeof value === 'string' ? parseFloat(value) : value as number;
+    } else if (field === 'ticker') {
+      newStocks[index][field] = value as string;
+    } else if (field === 'historicalPrices') {
+      newStocks[index][field] = value as number[];
     }
     setStocks(newStocks);
   };
@@ -60,32 +64,11 @@ const PortfolioAnalysis: React.FC = () => {
         throw new Error('Weights must sum to 1');
       }
 
-      const requestData = {
-        stocks: stocks.map(s => ({ ticker: s.ticker, weight: s.weight })),
-        period
-      };
+      const tickers = stocks.map(s => s.ticker);
+      const prices = stocks.map(s => s.historicalPrices || []);
+      const windowSize = 30; // You can make this configurable
 
-      console.log('Sending request to analyze portfolio:', requestData);
-
-      const response = await fetch('http://192.168.75.248:5000/analyze-portfolio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-        console.error('Error response:', errorData);
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Received portfolio analysis data:', data);
+      const data = await analyzePortfolio(tickers, prices, windowSize);
       setMetrics(data);
     } catch (err) {
       console.error('Error analyzing portfolio:', err);
