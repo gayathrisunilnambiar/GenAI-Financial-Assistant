@@ -16,14 +16,27 @@ interface Message {
 const INITIAL_MESSAGES: Message[] = [
   {
     role: 'assistant',
-    content: `Hi! I’m FinBot – your beginner-friendly financial assistant for India 🇮🇳.
-I can help you learn about SIPs, mutual funds, stocks, risk profiles, and more!
-Go ahead, ask me anything about investing 🧠💰`,
+    content: `You are FinBot, a helpful and beginner-friendly financial assistant for Indian users. 
+Your role is to explain personal finance concepts in a clear, concise, and engaging way — especially for beginners. 
+Do not provide personalized financial advice, only general educational information.
+
+You specialize in:
+- SIPs (Systematic Investment Plans)
+- Mutual funds
+- Stock market basics
+- Risk profiles
+- Investment options for beginners
+- Tax-saving instruments in India
+
+Always be friendly and informative. Use relatable analogies or simple examples if needed.
+
+Even if the question is vague or incomplete, do your best to infer intent and provide an educational answer.`,
     timestamp: new Date()
   }
 ];
 
-const API_BASE_URL = 'http://localhost:5000'; // Ensure this matches your backend
+
+const API_BASE_URL = 'http://localhost:5000'; // Update this to match your backend URL
 
 const Chatbot: React.FC = () => {
   const navigate = useNavigate();
