@@ -3,27 +3,33 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserIcon from '../components/UserIcon';
 import './PortfolioAnalysis.css';
-import { analyzePortfolio } from '../api/apiService';
+import axios from 'axios';
 
-interface PortfolioMetrics {
-  prediction: number;
-  mse: number;
-  rmse: number;
-  mae: number;
+interface StockAnalysis {
+  ticker: string;
+  weight: number;
   expectedReturn: number;
   volatility: number;
-  sharpeRatio: number;
+}
+
+interface PortfolioSummary {
+  total_expected_return: number;
+  total_volatility: number;
+}
+
+interface PortfolioAnalysisResult {
+  portfolio_analysis: StockAnalysis[];
+  portfolio_summary: PortfolioSummary;
 }
 
 interface StockInput {
   ticker: string;
   weight: number;
-  historicalPrices?: number[];
 }
 
 const PortfolioAnalysis: React.FC = () => {
   const { currentUser, loading, logout } = useAuth();
-  const [metrics, setMetrics] = useState<PortfolioMetrics | null>(null);
+  const [analysis, setAnalysis] = useState<PortfolioAnalysisResult | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stocks, setStocks] = useState<StockInput[]>([
@@ -33,14 +39,12 @@ const PortfolioAnalysis: React.FC = () => {
   ]);
   const [period, setPeriod] = useState('1y');
 
-  const handleStockChange = (index: number, field: keyof StockInput, value: string | number | number[]) => {
+  const handleStockChange = (index: number, field: keyof StockInput, value: string | number) => {
     const newStocks = [...stocks];
     if (field === 'weight') {
       newStocks[index][field] = typeof value === 'string' ? parseFloat(value) : value as number;
-    } else if (field === 'ticker') {
+    } else {
       newStocks[index][field] = value as string;
-    } else if (field === 'historicalPrices') {
-      newStocks[index][field] = value as number[];
     }
     setStocks(newStocks);
   };
@@ -51,6 +55,40 @@ const PortfolioAnalysis: React.FC = () => {
 
   const removeStock = (index: number) => {
     setStocks(stocks.filter((_, i) => i !== index));
+  };
+
+  const analyzePortfolio = async () => {
+    try {
+      // Mock API response - replace with actual API call
+      const mockResponse = {
+        portfolio_analysis: stocks.map(stock => ({
+          ticker: stock.ticker,
+          weight: stock.weight,
+          expectedReturn: Math.random() * 0.2,
+          volatility: Math.random() * 0.1
+        })),
+        portfolio_summary: {
+          total_expected_return: stocks.reduce((sum, stock) => sum + (stock.weight * 0.1), 0),
+          total_volatility: stocks.reduce((sum, stock) => sum + (stock.weight * 0.05), 0)
+        }
+      };
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return mockResponse;
+      
+      /* Actual API call would look like:
+      const response = await axios.post('http://localhost:5000/analyze_portfolio', {
+        stocks: stocks,
+        time_period: period
+      });
+      return response.data;
+      */
+    } catch (error) {
+      console.error('API Error:', error);
+      throw new Error('Failed to analyze portfolio. Please try again later.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,12 +102,8 @@ const PortfolioAnalysis: React.FC = () => {
         throw new Error('Weights must sum to 1');
       }
 
-      const tickers = stocks.map(s => s.ticker);
-      const prices = stocks.map(s => s.historicalPrices || []);
-      const windowSize = 30; // You can make this configurable
-
-      const data = await analyzePortfolio(tickers, prices, windowSize);
-      setMetrics(data);
+      const result = await analyzePortfolio();
+      setAnalysis(result);
     } catch (err) {
       console.error('Error analyzing portfolio:', err);
       setError(err instanceof Error ? err.message : 'An error occurred while analyzing the portfolio');
@@ -89,6 +123,10 @@ const PortfolioAnalysis: React.FC = () => {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const formatPercent = (value: number) => {
+    return (value * 100).toFixed(2) + '%';
   };
 
   return (
@@ -120,8 +158,8 @@ const PortfolioAnalysis: React.FC = () => {
                 className="period-select"
               >
                 <option value="1d">1 Day</option>
-                <option value="1w">1 Week</option>
-                <option value="1m">1 Month</option>
+                <option value="1wk">1 Week</option>
+                <option value="1mo">1 Month</option>
                 <option value="1y">1 Year</option>
               </select>
             </div>
@@ -180,52 +218,52 @@ const PortfolioAnalysis: React.FC = () => {
 
           {error && <div className="error-message">{error}</div>}
 
-          {metrics && (
-            <>
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <h3>Expected Return</h3>
-                  <p className="metric-value">{(metrics.expectedReturn * 100).toFixed(2)}%</p>
-                  <p className="metric-label">Annualized</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Volatility</h3>
-                  <p className="metric-value">{(metrics.volatility * 100).toFixed(2)}%</p>
-                  <p className="metric-label">Annualized</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Sharpe Ratio</h3>
-                  <p className="metric-value">{metrics.sharpeRatio.toFixed(4)}</p>
-                  <p className="metric-label">Risk-Adjusted Return</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Predicted Value</h3>
-                  <p className="metric-value">${metrics.prediction.toFixed(2)}</p>
-                  <p className="metric-label">Next Period</p>
+          {analysis && (
+            <div className="results-section">
+              <div className="portfolio-summary">
+                <h3>Portfolio Summary</h3>
+                <div className="metrics-grid">
+                  <div className="metric-card">
+                    <h3>Expected Return</h3>
+                    <p className="metric-value">
+                      {formatPercent(analysis.portfolio_summary.total_expected_return)}
+                    </p>
+                  </div>
+                  <div className="metric-card">
+                    <h3>Volatility</h3>
+                    <p className="metric-value">
+                      {formatPercent(analysis.portfolio_summary.total_volatility)}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="model-performance">
-                <h3>Model Performance</h3>
-                <div className="metrics-grid">
-                  <div className="metric-card">
-                    <h3>Mean Absolute Error</h3>
-                    <p className="metric-value">{metrics.mae.toFixed(4)}</p>
-                    <p className="metric-label">Prediction Accuracy</p>
-                  </div>
-                  <div className="metric-card">
-                    <h3>Mean Squared Error</h3>
-                    <p className="metric-value">{metrics.mse.toFixed(4)}</p>
-                    <p className="metric-label">Model Performance</p>
-                  </div>
-                  <div className="metric-card">
-                    <h3>Root Mean Squared Error</h3>
-                    <p className="metric-value">{metrics.rmse.toFixed(4)}</p>
-                    <p className="metric-label">Model Performance</p>
-                  </div>
+              <div className="stock-analysis">
+                <h3>Stock Performance</h3>
+                <div className="analysis-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ticker</th>
+                        <th>Weight</th>
+                        <th>Expected Return</th>
+                        <th>Volatility</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analysis.portfolio_analysis.map((stock, index) => (
+                        <tr key={index}>
+                          <td>{stock.ticker}</td>
+                          <td>{formatPercent(stock.weight)}</td>
+                          <td>{formatPercent(stock.expectedReturn)}</td>
+                          <td>{formatPercent(stock.volatility)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </section>
       </main>
@@ -233,4 +271,4 @@ const PortfolioAnalysis: React.FC = () => {
   );
 };
 
-export default PortfolioAnalysis; 
+export default PortfolioAnalysis;

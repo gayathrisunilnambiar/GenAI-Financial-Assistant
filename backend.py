@@ -149,4 +149,3 @@ if __name__ == "__main__":
         log_level="info",  # <-- This ensures logs appear
         access_log=True   # <-- Shows HTTP requests
     )
-

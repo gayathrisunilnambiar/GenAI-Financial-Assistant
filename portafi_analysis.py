@@ -87,14 +87,6 @@ Y_test_rescaled = scaler.inverse_transform(
     np.concatenate((Y_test.reshape(-1, 1), np.zeros((Y_test.shape[0], 4))), axis=1)
 )[:, 0]
 
-# Evaluation Metrics
-mae = mean_absolute_error(Y_test_rescaled, predictions)
-mse = mean_squared_error(Y_test_rescaled, predictions)
-rmse = np.sqrt(mse)
-
-print(f"📊 Mean Absolute Error (MAE): {mae:.4f}")
-print(f"📊 Mean Squared Error (MSE): {mse:.4f}")
-print(f"📊 Root Mean Squared Error (RMSE): {rmse:.4f}")
 
 # Portfolio Analysis
 portfolio_weights = {"AAPL": 0.2, "MSFT": 0.3, "GOOGL": 0.25, "AMZN": 0.15, "TSLA": 0.1}
